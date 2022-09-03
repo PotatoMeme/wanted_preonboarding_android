@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/page_topnews"
+        android:enabled="true"
+        android:icon="@drawable/ic_newspaper"
+        android:title="@string/top_news"/>
+    <item
+        android:id="@+id/page_category"
+        android:enabled="true"
+        android:icon="@drawable/ic_category"
+        android:title="@string/categories"/>
+    <item
+        android:id="@+id/page_save"
+        android:enabled="true"
+        android:icon="@drawable/ic_save"
+        android:title="@string/saved"/>
+</menu>
