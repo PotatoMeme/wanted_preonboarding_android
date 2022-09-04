@@ -1,32 +1,61 @@
 package com.potatomeme.newsapp.adapter
 
-import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
-import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.potatomeme.newsapp.R
 import com.potatomeme.newsapp.gson.Article
+import com.potatomeme.newsapp.helper.AppHelper
 
 
-class NewsAdapter(private val news: List<Article>,private val context: Context) : RecyclerView.Adapter<NewsAdapter.ViewHolder>() {
-    class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+class NewsAdapter(private val news: List<Article>) :
+    RecyclerView.Adapter<NewsAdapter.ViewHolder>() {
 
-        val newsImage : ImageView
-        val newsTitle : TextView
-        val newsReporter : TextView
-        val newsTime : TextView
+    interface OnItemClickListener {
+        fun onItemClick(v: View, data: Article, pos: Int)
+    }
+
+    private var listener: OnItemClickListener? = null
+
+    fun setOnItemClickListener(listener: OnItemClickListener) {
+        this.listener = listener
+    }
+
+    inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+
+        val newsImage: ImageView
+        val newsTitle: TextView
+        val newsReporter: TextView
+        val newsTime: TextView
+
         init {
             newsImage = view.findViewById(R.id.news_image)
             newsTitle = view.findViewById(R.id.news_title)
             newsReporter = view.findViewById(R.id.news_reporter)
             newsTime = view.findViewById(R.id.news_time)
         }
+
+        fun bind(item: Article) {
+            newsTitle.text = item.title
+            newsTime.text = AppHelper.intervalBetweenDate(item.publishedAt)
+            newsReporter.text = item.author
+            Glide.with(itemView)
+                .load(item.urlToImage)
+                .into(newsImage)
+
+            val pos = adapterPosition
+            if (pos != RecyclerView.NO_POSITION) {
+                itemView.setOnClickListener {
+                    listener?.onItemClick(itemView, item, pos)
+                }
+            }
+        }
     }
+
 
     override fun onCreateViewHolder(viewGroup: ViewGroup, viewType: Int): ViewHolder {
         // Create a new view, which defines the UI of the list item
@@ -37,16 +66,10 @@ class NewsAdapter(private val news: List<Article>,private val context: Context) 
 
     override fun onBindViewHolder(viewHolder: ViewHolder, position: Int) {
         val item = news[position]
-        viewHolder.newsTitle.text = item.title
-        viewHolder.newsTime.text = item.publishedAt
-        viewHolder.newsReporter.text = item.author
-        Glide.with(context)
-            .load(item.urlToImage)
-            .into(viewHolder.newsImage)
+        viewHolder.bind(item)
     }
 
 
-
-    override fun getItemCount(): Int  = news.size
+    override fun getItemCount(): Int = news.size
 
 }
