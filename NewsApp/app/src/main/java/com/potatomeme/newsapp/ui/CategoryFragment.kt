@@ -14,6 +14,7 @@ import com.potatomeme.newsapp.R
 import com.potatomeme.newsapp.adapter.NewsAdapter
 import com.potatomeme.newsapp.api.RetrofitInstance
 import com.potatomeme.newsapp.databinding.ActivityMainBinding
+import com.potatomeme.newsapp.databinding.FragmentCategoryBinding
 import com.potatomeme.newsapp.databinding.FragmentTopNewsBinding
 import com.potatomeme.newsapp.gson.Article
 import com.potatomeme.newsapp.gson.NewsResponse
@@ -22,9 +23,9 @@ import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 
-class SaveNewsFragment : Fragment() {
+class CategoryFragment : Fragment() {
 
-    private var mBinding: FragmentTopNewsBinding? = null
+    private var mBinding: FragmentCategoryBinding? = null
     private val binding get() = mBinding!!
     var mainActivity: MainActivity? = null
 
@@ -39,7 +40,16 @@ class SaveNewsFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        mBinding = FragmentTopNewsBinding.inflate(inflater, container, false)
+        mBinding = FragmentCategoryBinding.inflate(inflater, container, false)
+
+        binding.categoryBusiness.setOnClickListener { mainActivity?.showCategoryListFragment(0) }
+        binding.categoryEntertainment.setOnClickListener { mainActivity?.showCategoryListFragment(1) }
+        binding.categoryGeneral.setOnClickListener { mainActivity?.showCategoryListFragment(2) }
+        binding.categoryHealth.setOnClickListener { mainActivity?.showCategoryListFragment(3) }
+        binding.categoryScience.setOnClickListener { mainActivity?.showCategoryListFragment(4) }
+        binding.categorySports.setOnClickListener { mainActivity?.showCategoryListFragment(5) }
+        binding.categoryTechnology.setOnClickListener { mainActivity?.showCategoryListFragment(6) }
+
 
         return binding.root
     }
@@ -47,16 +57,8 @@ class SaveNewsFragment : Fragment() {
     override fun onResume() {
         super.onResume()
         Log.d(TAG, "on Resume")
-        Thread(Runnable {
-            val adapter = DbHelper.findAllArticle()?.let { NewsAdapter(it) }
-            adapter?.setOnItemClickListener(object : NewsAdapter.OnItemClickListener {
-                override fun onItemClick(v: View, data: Article, pos: Int) {
-                    mainActivity?.showDetailFragment(data)
-                }
-            })
-            binding.newsList.adapter = adapter
-        }).start()
     }
+
 
     override fun onPause() {
         super.onPause()
@@ -72,6 +74,6 @@ class SaveNewsFragment : Fragment() {
 
 
     companion object {
-        private const val TAG = "TopNewsFragment"
+        private const val TAG = "CategoryFragment"
     }
 }

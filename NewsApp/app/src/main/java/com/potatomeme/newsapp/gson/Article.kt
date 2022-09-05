@@ -17,27 +17,27 @@ data class Article(
     var url: String,
     var urlToImage: String
 
-){
-    fun checkNull(){
-        if(author == null){
+) {
+    fun checkNull() {
+        if (author == null) {
             author = ""
         }
-        if(content == null){
+        if (content == null) {
             content = ""
         }
-        if(description == null){
+        if (description == null) {
             description = ""
         }
-        if(publishedAt == null){
+        if (publishedAt == null) {
             publishedAt = ""
         }
-        if(title == null){
+        if (title == null) {
             title = ""
         }
-        if(author == null){
+        if (author == null) {
             url = ""
         }
-        if(urlToImage == null){
+        if (urlToImage == null) {
             urlToImage = ""
         }
 

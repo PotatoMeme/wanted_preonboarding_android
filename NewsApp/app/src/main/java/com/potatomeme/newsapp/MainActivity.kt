@@ -4,36 +4,30 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.view.MenuItem
-import androidx.room.Room
-import com.potatomeme.newsapp.adapter.NewsAdapter
-import com.potatomeme.newsapp.api.NewsApi
-import com.potatomeme.newsapp.api.RetrofitInstance
-import com.potatomeme.newsapp.database.ArticleDatabase
 import com.potatomeme.newsapp.databinding.ActivityMainBinding
 import com.potatomeme.newsapp.gson.Article
-import com.potatomeme.newsapp.gson.NewsResponse
 import com.potatomeme.newsapp.helper.DbHelper
-import com.potatomeme.newsapp.ui.NewsDetailFragment
-import com.potatomeme.newsapp.ui.SaveNewsFragment
-import com.potatomeme.newsapp.ui.TopNewsFragment
+import com.potatomeme.newsapp.ui.*
 import com.potatomeme.newsapp.utils.Constants
-import okhttp3.OkHttpClient
-import okhttp3.logging.HttpLoggingInterceptor
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
-import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
-import java.lang.reflect.Type
+import java.util.*
 
 class MainActivity : AppCompatActivity() {
 
-    private var mBinding : ActivityMainBinding? = null
+    private var mBinding: ActivityMainBinding? = null
     private val binding get() = mBinding!!
 
-    lateinit var newsDetailFragment : NewsDetailFragment
+    lateinit var newsDetailFragment: NewsDetailFragment
     lateinit var topNewsFragment: TopNewsFragment
     lateinit var saveNewsFragment: SaveNewsFragment
+    lateinit var categoryNewsFragment: CategoryNewsFragment
+
+    var fragState = Stack<Frag>()
+
+    var curentCategory = 0
+
+    enum class Frag {
+        TopNews, TopNewsDetail, CategorySelect, CategoryList, CategoryNewsDetail, SavedNews, SavedNewsDetail
+    }
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -41,7 +35,7 @@ class MainActivity : AppCompatActivity() {
         //  DBsetting
         DbHelper.dbSetting(applicationContext)
         Thread(Runnable {
-            Log.d(TAG,"size : ${DbHelper.findAllArticle()?.size}")
+            Log.d(TAG, "size : ${DbHelper.findAllArticle()?.size}")
         }).start()
 
         //  Activity_Main UI setting
@@ -55,36 +49,59 @@ class MainActivity : AppCompatActivity() {
             .beginTransaction()
             .add(R.id.content_container, topNewsFragment)
             .commit()
+        fragState.add(Frag.TopNews)
 
         //  bottomNavigation
-        binding.bottomNavigation.setOnItemSelectedListener {item ->
-            when(item.itemId) {
+        binding.bottomNavigation.setOnItemSelectedListener { item ->
+            supportActionBar?.setDisplayHomeAsUpEnabled(false)
+            when (item.itemId) {
                 R.id.page_topnews -> {
                     setAppTitle("Top news")
-                    Log.d(TAG,"page_topnews selected")
-                    supportActionBar?.setDisplayHomeAsUpEnabled(false)
-                    topNewsFragment
+                    Log.d(TAG, "page_topnews selected")
+
                     supportFragmentManager
                         .beginTransaction()
                         .replace(R.id.content_container, topNewsFragment)
                         .commit()
+                    fragState.clear()
+                    fragState.add(Frag.TopNews)
                     true
                 }
                 R.id.page_category -> {
                     setAppTitle("Category")
-                    Log.d(TAG,"page_category selected")
+                    Log.d(TAG, "page_category selected")
+
+                    if (fragState.peek() == Frag.TopNews) {
+                        supportFragmentManager.beginTransaction().remove(topNewsFragment)
+                            .commit();
+                        supportFragmentManager.popBackStackImmediate()
+                    }
+
+                    supportFragmentManager
+                        .beginTransaction()
+                        .replace(R.id.content_container, CategoryFragment())
+                        .commit()
+                    fragState.clear()
+                    fragState.add(Frag.CategorySelect)
                     true
                 }
                 R.id.page_save -> {
                     setAppTitle("Saved News")
-                    Log.d(TAG,"page_save selected")
+                    Log.d(TAG, "page_save selected")
                     saveNewsFragment = SaveNewsFragment()
-                    supportActionBar?.setDisplayHomeAsUpEnabled(false)
-                    topNewsFragment
+
+                    if (fragState.peek() == Frag.TopNews) {
+                        supportFragmentManager.beginTransaction().remove(topNewsFragment)
+                            .commit();
+                        supportFragmentManager.popBackStackImmediate()
+                    }
+
                     supportFragmentManager
                         .beginTransaction()
                         .replace(R.id.content_container, saveNewsFragment)
                         .commit()
+                    fragState.clear()
+                    fragState.add(Frag.SavedNews)
                     true
                 }
                 else -> false
@@ -93,12 +110,37 @@ class MainActivity : AppCompatActivity() {
     }
 
     // DetailFragment show
-    fun showDetailFragment(data :Article){
+    fun showDetailFragment(data: Article) {
         newsDetailFragment = NewsDetailFragment(data)
+
+        setAppTitle(data.title)
+
+        when (fragState.peek()) {
+            Frag.TopNews -> fragState.add(Frag.TopNewsDetail)
+            Frag.CategoryList -> fragState.add(Frag.CategoryNewsDetail)
+            Frag.SavedNews -> fragState.add(Frag.SavedNewsDetail)
+            else -> {}
+        }
+
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         supportFragmentManager
             .beginTransaction()
-            .add(R.id.content_container,newsDetailFragment )
+            .add(R.id.content_container, newsDetailFragment)
+            .addToBackStack(null)
+            .commit()
+    }
+
+    // CategoryList show
+    fun showCategoryListFragment(i: Int) {
+        curentCategory = i
+        fragState.add(Frag.CategoryList)
+        currentAppTitle()
+        categoryNewsFragment = CategoryNewsFragment(i)
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        supportFragmentManager
+            .beginTransaction()
+            .add(R.id.content_container, categoryNewsFragment)
+            .addToBackStack(null)
             .commit()
     }
 
@@ -107,11 +149,20 @@ class MainActivity : AppCompatActivity() {
         currentAppTitle()
     }
 
+    // fragment 별
     private fun currentAppTitle() {
-        when(binding.bottomNavigation.selectedItemId){
-            R.id.page_topnews -> setAppTitle("Top news")
-            R.id.page_category -> setAppTitle("Category")
-            R.id.page_save -> setAppTitle("Save")
+        when (fragState.peek()) {
+            Frag.TopNews -> setAppTitle("Top news")
+            Frag.CategorySelect -> setAppTitle("Category")
+            Frag.CategoryList -> setAppTitle(
+                "Category - ${
+                    Constants.categoryShowList.get(
+                        curentCategory
+                    )
+                }"
+            )
+            Frag.SavedNews -> setAppTitle("Saved News")
+            else -> return
         }
     }
 
@@ -120,39 +171,46 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        when(item.itemId){
+        when (item.itemId) {
             android.R.id.home -> {
-                Log.d(TAG,"R.id.home click")
-                when(binding.bottomNavigation.selectedItemId){
-                    R.id.page_topnews,R.id.page_save -> {
-                        supportFragmentManager.beginTransaction().remove(newsDetailFragment).commit();
+                Log.d(TAG, "R.id.home click")
+                when (fragState.pop()) {
+                    Frag.TopNewsDetail, Frag.SavedNewsDetail -> {
+                        supportFragmentManager.beginTransaction().remove(newsDetailFragment)
+                            .commit();
+                        supportActionBar?.setDisplayHomeAsUpEnabled(false)
                     }
-                    R.id.page_category -> {
+                    Frag.CategoryNewsDetail -> {
+                        supportFragmentManager.beginTransaction().remove(newsDetailFragment)
+                            .commit();
                     }
+                    Frag.CategoryList -> {
+                        supportFragmentManager.beginTransaction().remove(categoryNewsFragment)
+                            .commit();
+                        supportActionBar?.setDisplayHomeAsUpEnabled(false)
+                    }
+                    else -> return false
                 }
-                supportFragmentManager.beginTransaction().remove(newsDetailFragment).commit();
                 supportFragmentManager.popBackStackImmediate()
                 currentAppTitle()
-                supportActionBar?.setDisplayHomeAsUpEnabled(false)
                 return true
             }
-            else -> return  false
+            else -> return false
         }
     }
 
     override fun onBackPressed() {
-        when(binding.bottomNavigation.selectedItemId){
-            R.id.page_topnews,R.id.page_save -> {
-                supportFragmentManager.beginTransaction().remove(newsDetailFragment).commit();
+        when (fragState.pop()) {
+            Frag.TopNewsDetail, Frag.SavedNewsDetail, Frag.CategoryList -> {
+                supportActionBar?.setDisplayHomeAsUpEnabled(false)
             }
-            R.id.page_category -> {
-            }
+            else -> {}
         }
-        supportFragmentManager.popBackStackImmediate()
         currentAppTitle()
-        supportActionBar?.setDisplayHomeAsUpEnabled(false)
-        //super.onBackPressed()
+        super.onBackPressed()
     }
+
+
     companion object {
         private const val TAG = "MainActivity"
     }

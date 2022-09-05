@@ -58,10 +58,9 @@ class NewsDetailFragment(var data: Article) : Fragment() {
 
         data.checkNull()
 
-        mainActivity?.setAppTitle(data.title)
         binding.newsTitle.text = data.title
 
-        val text ="${data.author} ${AppHelper.intervalBetweenDate(data.publishedAt)}"
+        val text = "${data.author} ${AppHelper.intervalBetweenDate(data.publishedAt)}"
         val spannable = SpannableStringBuilder(text)
         spannable.setSpan(
             ForegroundColorSpan(Color.GRAY),
@@ -84,7 +83,7 @@ class NewsDetailFragment(var data: Article) : Fragment() {
         binding.newsStarToggle.setOnClickListener {
             Thread(Runnable {
                 if (it.isActivated) {
-                    Log.d(TAG,"insert: ${data.toString()}")
+                    Log.d(TAG, "insert: ${data.toString()}")
                     DbHelper.insertArticle(data)
                 } else {
                     DbHelper.findByUrl(data.url)?.let { it1 -> DbHelper.deletArticle(it1) }

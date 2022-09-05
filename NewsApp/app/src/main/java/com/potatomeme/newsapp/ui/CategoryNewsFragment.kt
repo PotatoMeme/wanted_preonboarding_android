@@ -17,11 +17,12 @@ import com.potatomeme.newsapp.databinding.ActivityMainBinding
 import com.potatomeme.newsapp.databinding.FragmentTopNewsBinding
 import com.potatomeme.newsapp.gson.Article
 import com.potatomeme.newsapp.gson.NewsResponse
+import com.potatomeme.newsapp.utils.Constants
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 
-class TopNewsFragment : Fragment() {
+class CategoryNewsFragment(val num: Int) : Fragment() {
 
     private var mBinding: FragmentTopNewsBinding? = null
     private val binding get() = mBinding!!
@@ -45,7 +46,6 @@ class TopNewsFragment : Fragment() {
             container?.let { sendRequest(it.context) }
         })
         sendThread?.start()
-
         return binding.root
     }
 
@@ -56,28 +56,30 @@ class TopNewsFragment : Fragment() {
     }
 
     private fun sendRequest(context: Context) {
-        RetrofitInstance.api.getTopNews().enqueue(object : Callback<NewsResponse> {
-            override fun onResponse(call: Call<NewsResponse>, response: Response<NewsResponse>) {
-                if (response.isSuccessful) {
-                    result = response.body()
-                    Log.d(TAG, "onResponse 성공: " + result?.articles?.get(19));
-                    Log.d(TAG, "onResponse 성공: " + result?.totalResults);
-                    val adapter: NewsAdapter? = result?.articles?.let { NewsAdapter(it) }
-                    adapter?.setOnItemClickListener(object : NewsAdapter.OnItemClickListener {
-                        override fun onItemClick(v: View, data: Article, pos: Int) {
-                            mainActivity?.showDetailFragment(data)
-                        }
-                    })
-                    binding.newsList.adapter = adapter
-                } else {
-                    Log.d(TAG, "onResponse 실패")
+        RetrofitInstance.api.getCategoryNews(categoryCode = Constants.categoryList.get(num))
+            .enqueue(object : Callback<NewsResponse> {
+                override fun onResponse(
+                    call: Call<NewsResponse>,
+                    response: Response<NewsResponse>
+                ) {
+                    if (response.isSuccessful) {
+                        result = response.body()
+                        val adapter: NewsAdapter? = result?.articles?.let { NewsAdapter(it) }
+                        adapter?.setOnItemClickListener(object : NewsAdapter.OnItemClickListener {
+                            override fun onItemClick(v: View, data: Article, pos: Int) {
+                                mainActivity?.showDetailFragment(data)
+                            }
+                        })
+                        binding.newsList.adapter = adapter
+                    } else {
+                        Log.d(TAG, "onResponse 실패")
+                    }
                 }
-            }
 
-            override fun onFailure(call: Call<NewsResponse>, t: Throwable) {
-                Log.d(TAG, "onFailure 에러: " + t.message.toString());
-            }
-        })
+                override fun onFailure(call: Call<NewsResponse>, t: Throwable) {
+                    Log.d(TAG, "onFailure 에러: " + t.message.toString());
+                }
+            })
     }
 
     companion object {

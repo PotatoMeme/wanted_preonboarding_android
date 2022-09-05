@@ -11,23 +11,23 @@ interface NewsApi {
     @GET("v2/top-headlines")
     fun getTopNews(
         @Query("country")
-        countryCode:String = "us",
+        countryCode: String = "us",
         @Query("page")
-        pageNumber:Int =1,
+        pageNumber: Int = 1,
         @Query("apiKey")
-        apiKey:String = API_KEY
+        apiKey: String = API_KEY
     ): Call<NewsResponse>
 
     @GET("v2/top-headlines")
     fun getCategoryNews(
         @Query("country")
-        countryCode:String = "us",
+        countryCode: String = "us",
         @Query("category")
-        categoryCode:String,
+        categoryCode: String,
         @Query("page")
-        pageNumber:Int =1,
+        pageNumber: Int = 1,
         @Query("apiKey")
-        apiKey:String = API_KEY
+        apiKey: String = API_KEY
     ): Call<NewsResponse>
 
 
