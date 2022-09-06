@@ -25,7 +25,7 @@ class NewsAdapter(private var news: List<Article>) :
         this.listener = listener
     }
 
-    fun setNewsList(news: List<Article>){
+    fun setNewsList(news: List<Article>) {
         this.news = news
     }
 
@@ -43,18 +43,19 @@ class NewsAdapter(private var news: List<Article>) :
             newsTime = view.findViewById(R.id.news_time)
         }
 
-        fun bind(item: Article) {
-            newsTitle.text = item.title
-            newsTime.text = AppHelper.intervalBetweenDate(item.publishedAt)
-            newsReporter.text = item.author
+        fun bind(data: Article) {
+            newsTitle.text = data.title
+            newsTime.text = AppHelper.intervalBetweenDate(data.publishedAt)
+            newsReporter.text = data.author
+
             Glide.with(itemView)
-                .load(item.urlToImage)
+                .load(data.urlToImage)
                 .into(newsImage)
 
             val pos = adapterPosition
             if (pos != RecyclerView.NO_POSITION) {
                 itemView.setOnClickListener {
-                    listener?.onItemClick(itemView, item, pos)
+                    listener?.onItemClick(itemView, data, pos)
                 }
             }
         }

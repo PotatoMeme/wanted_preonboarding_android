@@ -14,6 +14,7 @@ class Constants {
             "sports",
             "technology"
         )
+
         val categoryShowList = arrayOf(
             "Business",
             "Entertainment",

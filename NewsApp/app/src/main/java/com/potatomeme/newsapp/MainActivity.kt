@@ -19,7 +19,7 @@ class MainActivity : AppCompatActivity() {
     lateinit var newsDetailFragment: NewsDetailFragment
     lateinit var topNewsFragment: TopNewsFragment
     lateinit var saveNewsFragment: SaveNewsFragment
-    lateinit var categoryNewsFragment: CategoryNewsFragment
+    lateinit var categoryListFragment: CategoryListFragment
 
     var fragState = Stack<Frag>()
 
@@ -32,16 +32,16 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        //  Activity_Main UI setting
+        mBinding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+        setSupportActionBar(binding.topAppBar)
+
         //  DBsetting
         DbHelper.dbSetting(applicationContext)
         Thread(Runnable {
             Log.d(TAG, "size : ${DbHelper.findAllArticle()?.size}")
         }).start()
-
-        //  Activity_Main UI setting
-        mBinding = ActivityMainBinding.inflate(layoutInflater)
-        setContentView(binding.root)
-        setSupportActionBar(binding.topAppBar)
 
         // default fragment
         topNewsFragment = TopNewsFragment()
@@ -63,6 +63,7 @@ class MainActivity : AppCompatActivity() {
                         .beginTransaction()
                         .replace(R.id.content_container, topNewsFragment)
                         .commit()
+
                     fragState.clear()
                     fragState.add(Frag.TopNews)
                     true
@@ -71,16 +72,11 @@ class MainActivity : AppCompatActivity() {
                     setAppTitle("Category")
                     Log.d(TAG, "page_category selected")
 
-                    if (fragState.peek() == Frag.TopNews) {
-                        supportFragmentManager.beginTransaction().remove(topNewsFragment)
-                            .commit();
-                        supportFragmentManager.popBackStackImmediate()
-                    }
-
                     supportFragmentManager
                         .beginTransaction()
                         .replace(R.id.content_container, CategoryFragment())
                         .commit()
+
                     fragState.clear()
                     fragState.add(Frag.CategorySelect)
                     true
@@ -90,16 +86,11 @@ class MainActivity : AppCompatActivity() {
                     Log.d(TAG, "page_save selected")
                     saveNewsFragment = SaveNewsFragment()
 
-                    if (fragState.peek() == Frag.TopNews) {
-                        supportFragmentManager.beginTransaction().remove(topNewsFragment)
-                            .commit();
-                        supportFragmentManager.popBackStackImmediate()
-                    }
-
                     supportFragmentManager
                         .beginTransaction()
                         .replace(R.id.content_container, saveNewsFragment)
                         .commit()
+
                     fragState.clear()
                     fragState.add(Frag.SavedNews)
                     true
@@ -135,11 +126,11 @@ class MainActivity : AppCompatActivity() {
         curentCategory = i
         fragState.add(Frag.CategoryList)
         currentAppTitle()
-        categoryNewsFragment = CategoryNewsFragment(i)
+        categoryListFragment = CategoryListFragment(i)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         supportFragmentManager
             .beginTransaction()
-            .add(R.id.content_container, categoryNewsFragment)
+            .add(R.id.content_container, categoryListFragment)
             .addToBackStack(null)
             .commit()
     }
@@ -149,7 +140,7 @@ class MainActivity : AppCompatActivity() {
         currentAppTitle()
     }
 
-    // fragment 별
+    // fragment 별 AppTitle
     private fun currentAppTitle() {
         when (fragState.peek()) {
             Frag.TopNews -> setAppTitle("Top news")
@@ -170,12 +161,13 @@ class MainActivity : AppCompatActivity() {
         binding.topAppBar.title = str
     }
 
+    // home키별 상호작용
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             android.R.id.home -> {
                 Log.d(TAG, "R.id.home click")
                 when (fragState.pop()) {
-                    Frag.TopNewsDetail-> {
+                    Frag.TopNewsDetail -> {
                         supportFragmentManager.beginTransaction().remove(newsDetailFragment)
                             .commit();
                         supportActionBar?.setDisplayHomeAsUpEnabled(false)
@@ -191,7 +183,7 @@ class MainActivity : AppCompatActivity() {
                             .commit();
                     }
                     Frag.CategoryList -> {
-                        supportFragmentManager.beginTransaction().remove(categoryNewsFragment)
+                        supportFragmentManager.beginTransaction().remove(categoryListFragment)
                             .commit();
                         supportActionBar?.setDisplayHomeAsUpEnabled(false)
                     }
@@ -205,6 +197,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    // home키로 나가는것이아닌 back키로 나간경우
     override fun onBackPressed() {
         when (fragState.pop()) {
             Frag.TopNewsDetail, Frag.CategoryList -> {

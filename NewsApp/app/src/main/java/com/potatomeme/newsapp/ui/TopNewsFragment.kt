@@ -25,10 +25,10 @@ class TopNewsFragment : Fragment() {
 
     private var mBinding: FragmentTopNewsBinding? = null
     private val binding get() = mBinding!!
+
     var mainActivity: MainActivity? = null
     var result: NewsResponse? = null
 
-    var sendThread: Thread? = null
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
@@ -41,9 +41,9 @@ class TopNewsFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         mBinding = FragmentTopNewsBinding.inflate(inflater, container, false)
-        sendThread = Thread(Runnable {
+        Thread(Runnable {
             container?.let { sendRequest(it.context) }
-        })
+        }).start()
         return binding.root
     }
 
@@ -54,22 +54,22 @@ class TopNewsFragment : Fragment() {
             }).start()
             binding.swipe.isRefreshing = false
         }
-        sendThread?.start()
         super.onResume()
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
+    override fun onDestroyView() {
+        super.onDestroyView()
         //mBinding = null
         mainActivity = null
     }
 
+
+    // retrofit으로 데이터 수신
     private fun sendRequest(context: Context) {
         RetrofitInstance.api.getTopNews().enqueue(object : Callback<NewsResponse> {
             override fun onResponse(call: Call<NewsResponse>, response: Response<NewsResponse>) {
                 if (response.isSuccessful) {
                     result = response.body()
-                    Log.d(TAG, "onResponse 성공: " + result?.articles?.get(19));
                     Log.d(TAG, "onResponse 성공: " + result?.totalResults);
                     val adapter: NewsAdapter? = result?.articles?.let { NewsAdapter(it) }
                     adapter?.setOnItemClickListener(object : NewsAdapter.OnItemClickListener {

@@ -54,8 +54,10 @@ class NewsDetailFragment(var data: Article) : Fragment() {
         setUi(data)
     }
 
-    fun setUi(data: Article) {
 
+    // ui setting
+    fun setUi(data: Article) {
+        // null check
         data.checkNull()
 
         binding.newsTitle.text = data.title
@@ -68,18 +70,20 @@ class NewsDetailFragment(var data: Article) : Fragment() {
             text.length, // end
             Spannable.SPAN_EXCLUSIVE_INCLUSIVE
         )
+
         binding.newsReporter.text = spannable
-
-
         binding.newsContent.text = data.content
+
         context?.let {
             Glide.with(it)
                 .load(data.urlToImage)
                 .into(binding.newsImage)
         }
+
         Thread(Runnable {
             binding.newsStarToggle.isActivated = DbHelper.findByUrlBoolean(data.url)
         }).start()
+
         binding.newsStarToggle.setOnClickListener {
             Thread(Runnable {
                 if (it.isActivated) {
@@ -95,10 +99,10 @@ class NewsDetailFragment(var data: Article) : Fragment() {
 
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
+    override fun onDestroyView() {
+        super.onDestroyView()
         mBinding = null
-        //mainActivity = null
+        mainActivity = null
     }
 
 

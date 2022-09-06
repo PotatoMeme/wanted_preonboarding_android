@@ -54,24 +54,11 @@ class CategoryFragment : Fragment() {
         return binding.root
     }
 
-    override fun onResume() {
-        super.onResume()
-        Log.d(TAG, "on Resume")
-    }
-
-
-    override fun onPause() {
-        super.onPause()
-        Log.d(TAG, "onPause")
-    }
-
-
-    override fun onDestroy() {
-        super.onDestroy()
+    override fun onDestroyView() {
+        super.onDestroyView()
         mBinding = null
         mainActivity = null
     }
-
 
     companion object {
         private const val TAG = "CategoryFragment"

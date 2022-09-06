@@ -26,6 +26,7 @@ class SaveNewsFragment : Fragment() {
 
     private var mBinding: FragmentTopNewsBinding? = null
     private val binding get() = mBinding!!
+
     var mainActivity: MainActivity? = null
     var adapter : NewsAdapter? = null
 
@@ -41,12 +42,6 @@ class SaveNewsFragment : Fragment() {
     ): View? {
         mBinding = FragmentTopNewsBinding.inflate(inflater, container, false)
 
-        return binding.root
-    }
-
-    override fun onResume() {
-        super.onResume()
-        Log.d(TAG, "on Resume")
         Thread(Runnable {
             adapter = DbHelper.findAllArticle()?.let { NewsAdapter(it) }
             adapter?.setOnItemClickListener(object : NewsAdapter.OnItemClickListener {
@@ -56,8 +51,11 @@ class SaveNewsFragment : Fragment() {
             })
             binding.newsList.adapter = adapter
         }).start()
+
+        return binding.root
     }
 
+    //  detailview 나가고 확인용
     fun reloadData(){
         Thread(Runnable {
             DbHelper.findAllArticle()?.let { adapter?.setNewsList(it) }
@@ -66,20 +64,14 @@ class SaveNewsFragment : Fragment() {
     }
 
 
-    override fun onPause() {
-        super.onPause()
-        Log.d(TAG, "onPause")
-    }
-
-
-    override fun onDestroy() {
-        super.onDestroy()
+    override fun onDestroyView() {
+        super.onDestroyView()
         mBinding = null
         mainActivity = null
     }
 
 
     companion object {
-        private const val TAG = "TopNewsFragment"
+        private const val TAG = "SaveNewsFragment"
     }
 }

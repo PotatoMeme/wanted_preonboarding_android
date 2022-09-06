@@ -22,7 +22,7 @@ import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 
-class CategoryNewsFragment(val num: Int) : Fragment() {
+class CategoryListFragment(val num: Int) : Fragment() {
 
     private var mBinding: FragmentTopNewsBinding? = null
     private val binding get() = mBinding!!
@@ -55,13 +55,15 @@ class CategoryNewsFragment(val num: Int) : Fragment() {
         return binding.root
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
+    override fun onDestroyView() {
+        super.onDestroyView()
         mBinding = null
         mainActivity = null
     }
 
+    // retrofit으로 데이터 수신
     private fun sendRequest(context: Context) {
+        // 카테고리별
         RetrofitInstance.api.getCategoryNews(categoryCode = Constants.categoryList.get(num))
             .enqueue(object : Callback<NewsResponse> {
                 override fun onResponse(
@@ -89,6 +91,6 @@ class CategoryNewsFragment(val num: Int) : Fragment() {
     }
 
     companion object {
-        private const val TAG = "TopNewsFragment"
+        private const val TAG = "CategoryListFragment"
     }
 }
