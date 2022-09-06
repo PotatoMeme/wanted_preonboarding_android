@@ -1,20 +1,16 @@
 package com.potatomeme.newsapp.ui
 
 import android.content.Context
-import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.fragment.app.Fragment
 import com.potatomeme.newsapp.MainActivity
-import com.potatomeme.newsapp.R
 import com.potatomeme.newsapp.adapter.NewsAdapter
 import com.potatomeme.newsapp.api.RetrofitInstance
-import com.potatomeme.newsapp.databinding.ActivityMainBinding
-import com.potatomeme.newsapp.databinding.FragmentTopNewsBinding
+import com.potatomeme.newsapp.databinding.FragmentNewsListBinding
 import com.potatomeme.newsapp.gson.Article
 import com.potatomeme.newsapp.gson.NewsResponse
 import retrofit2.Call
@@ -23,11 +19,11 @@ import retrofit2.Response
 
 class TopNewsFragment : Fragment() {
 
-    private var mBinding: FragmentTopNewsBinding? = null
+    private var mBinding: FragmentNewsListBinding? = null
     private val binding get() = mBinding!!
 
-    var mainActivity: MainActivity? = null
-    var result: NewsResponse? = null
+    private var mainActivity: MainActivity? = null
+    private var result: NewsResponse? = null
 
 
     override fun onAttach(context: Context) {
@@ -39,19 +35,19 @@ class TopNewsFragment : Fragment() {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        mBinding = FragmentTopNewsBinding.inflate(inflater, container, false)
-        Thread(Runnable {
-            container?.let { sendRequest(it.context) }
-        }).start()
+    ): View {
+        mBinding = FragmentNewsListBinding.inflate(inflater, container, false)
+        Thread {
+            container?.let { sendRequest() }
+        }.start()
         return binding.root
     }
 
     override fun onResume() {
         binding.swipe.setOnRefreshListener {
-            Thread(Runnable {
-                mainActivity?.let { sendRequest(it.applicationContext) }
-            }).start()
+            Thread {
+                mainActivity?.let { sendRequest() }
+            }.start()
             binding.swipe.isRefreshing = false
         }
         super.onResume()
@@ -64,13 +60,13 @@ class TopNewsFragment : Fragment() {
     }
 
 
-    // retrofit으로 데이터 수신
-    private fun sendRequest(context: Context) {
+    // retrofit 으로 데이터 수신
+    private fun sendRequest() {
         RetrofitInstance.api.getTopNews().enqueue(object : Callback<NewsResponse> {
             override fun onResponse(call: Call<NewsResponse>, response: Response<NewsResponse>) {
                 if (response.isSuccessful) {
                     result = response.body()
-                    Log.d(TAG, "onResponse 성공: " + result?.totalResults);
+                    Log.d(TAG, "onResponse 성공: " + result?.totalResults)
                     val adapter: NewsAdapter? = result?.articles?.let { NewsAdapter(it) }
                     adapter?.setOnItemClickListener(object : NewsAdapter.OnItemClickListener {
                         override fun onItemClick(v: View, data: Article, pos: Int) {
@@ -84,7 +80,7 @@ class TopNewsFragment : Fragment() {
             }
 
             override fun onFailure(call: Call<NewsResponse>, t: Throwable) {
-                Log.d(TAG, "onFailure 에러: " + t.message.toString());
+                Log.d(TAG, "onFailure 에러: " + t.message.toString())
             }
         })
     }

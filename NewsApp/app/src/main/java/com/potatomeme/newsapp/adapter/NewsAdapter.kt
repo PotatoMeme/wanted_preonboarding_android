@@ -31,10 +31,10 @@ class NewsAdapter(private var news: List<Article>) :
 
     inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
 
-        val newsImage: ImageView
-        val newsTitle: TextView
-        val newsReporter: TextView
-        val newsTime: TextView
+        private val newsImage: ImageView
+        private val newsTitle: TextView
+        private val newsReporter: TextView
+        private val newsTime: TextView
 
         init {
             newsImage = view.findViewById(R.id.news_image)

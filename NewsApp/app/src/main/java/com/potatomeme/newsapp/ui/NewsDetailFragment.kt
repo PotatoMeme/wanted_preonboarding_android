@@ -1,7 +1,6 @@
 package com.potatomeme.newsapp.ui
 
 import android.content.Context
-import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
 import android.text.Spannable
@@ -11,29 +10,19 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.fragment.app.Fragment
 import com.bumptech.glide.Glide
 import com.potatomeme.newsapp.MainActivity
-import com.potatomeme.newsapp.R
-import com.potatomeme.newsapp.adapter.NewsAdapter
-import com.potatomeme.newsapp.api.RetrofitInstance
-import com.potatomeme.newsapp.databinding.ActivityMainBinding
 import com.potatomeme.newsapp.databinding.FragmentNewsDetailBinding
-import com.potatomeme.newsapp.databinding.FragmentTopNewsBinding
 import com.potatomeme.newsapp.gson.Article
-import com.potatomeme.newsapp.gson.NewsResponse
 import com.potatomeme.newsapp.helper.AppHelper
 import com.potatomeme.newsapp.helper.DbHelper
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
 
 class NewsDetailFragment(var data: Article) : Fragment() {
 
     private var mBinding: FragmentNewsDetailBinding? = null
     private val binding get() = mBinding!!
-    var mainActivity: MainActivity? = null
+    private var mainActivity: MainActivity? = null
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
@@ -44,7 +33,7 @@ class NewsDetailFragment(var data: Article) : Fragment() {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         mBinding = FragmentNewsDetailBinding.inflate(inflater, container, false)
         return binding.root
     }
@@ -56,7 +45,7 @@ class NewsDetailFragment(var data: Article) : Fragment() {
 
 
     // ui setting
-    fun setUi(data: Article) {
+    private fun setUi(data: Article) {
         // null check
         data.checkNull()
 
@@ -80,19 +69,19 @@ class NewsDetailFragment(var data: Article) : Fragment() {
                 .into(binding.newsImage)
         }
 
-        Thread(Runnable {
+        Thread {
             binding.newsStarToggle.isActivated = DbHelper.findByUrlBoolean(data.url)
-        }).start()
+        }.start()
 
         binding.newsStarToggle.setOnClickListener {
-            Thread(Runnable {
+            Thread {
                 if (it.isActivated) {
-                    Log.d(TAG, "insert: ${data.toString()}")
+                    Log.d(TAG, "insert: $data")
                     DbHelper.insertArticle(data)
                 } else {
                     DbHelper.findByUrl(data.url)?.let { it1 -> DbHelper.deletArticle(it1) }
                 }
-            }).start()
+            }.start()
 
             it.isActivated = !it.isActivated
         }

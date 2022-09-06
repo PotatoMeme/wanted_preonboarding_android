@@ -16,15 +16,13 @@ class MainActivity : AppCompatActivity() {
     private var mBinding: ActivityMainBinding? = null
     private val binding get() = mBinding!!
 
-    lateinit var newsDetailFragment: NewsDetailFragment
-    lateinit var topNewsFragment: TopNewsFragment
-    lateinit var saveNewsFragment: SaveNewsFragment
-    lateinit var categoryListFragment: CategoryListFragment
+    private lateinit var newsDetailFragment: NewsDetailFragment
+    private lateinit var topNewsFragment: TopNewsFragment
+    private lateinit var saveNewsFragment: SaveNewsFragment
+    private lateinit var categoryListFragment: CategoryListFragment
 
-    var fragState = Stack<Frag>()
-
-    var curentCategory = 0
-
+    private var fragState = Stack<Frag>()
+    private var currentCategory: Int = 0
     enum class Frag {
         TopNews, TopNewsDetail, CategorySelect, CategoryList, CategoryNewsDetail, SavedNews, SavedNewsDetail
     }
@@ -39,9 +37,9 @@ class MainActivity : AppCompatActivity() {
 
         //  DBsetting
         DbHelper.dbSetting(applicationContext)
-        Thread(Runnable {
+        Thread {
             Log.d(TAG, "size : ${DbHelper.findAllArticle()?.size}")
-        }).start()
+        }.start()
 
         // default fragment
         topNewsFragment = TopNewsFragment()
@@ -123,7 +121,7 @@ class MainActivity : AppCompatActivity() {
 
     // CategoryList show
     fun showCategoryListFragment(i: Int) {
-        curentCategory = i
+        currentCategory = i
         fragState.add(Frag.CategoryList)
         currentAppTitle()
         categoryListFragment = CategoryListFragment(i)
@@ -147,9 +145,7 @@ class MainActivity : AppCompatActivity() {
             Frag.CategorySelect -> setAppTitle("Category")
             Frag.CategoryList -> setAppTitle(
                 "Category - ${
-                    Constants.categoryShowList.get(
-                        curentCategory
-                    )
+                    Constants.categoryShowList[currentCategory]
                 }"
             )
             Frag.SavedNews -> setAppTitle("Saved News")
@@ -157,7 +153,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    fun setAppTitle(str: String) {
+    private fun setAppTitle(str: String) {
         binding.topAppBar.title = str
     }
 
@@ -169,22 +165,22 @@ class MainActivity : AppCompatActivity() {
                 when (fragState.pop()) {
                     Frag.TopNewsDetail -> {
                         supportFragmentManager.beginTransaction().remove(newsDetailFragment)
-                            .commit();
+                            .commit()
                         supportActionBar?.setDisplayHomeAsUpEnabled(false)
                     }
                     Frag.SavedNewsDetail -> {
                         supportFragmentManager.beginTransaction().remove(newsDetailFragment)
-                            .commit();
+                            .commit()
                         supportActionBar?.setDisplayHomeAsUpEnabled(false)
                         saveNewsFragment.reloadData()
                     }
                     Frag.CategoryNewsDetail -> {
                         supportFragmentManager.beginTransaction().remove(newsDetailFragment)
-                            .commit();
+                            .commit()
                     }
                     Frag.CategoryList -> {
                         supportFragmentManager.beginTransaction().remove(categoryListFragment)
-                            .commit();
+                            .commit()
                         supportActionBar?.setDisplayHomeAsUpEnabled(false)
                     }
                     else -> return false

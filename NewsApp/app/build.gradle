@@ -65,6 +65,7 @@ dependencies {
     implementation("androidx.room:room-runtime:2.4.3")
     kapt "androidx.room:room-compiler:2.4.3"
 
+    // swipeRefreshLayout
     implementation "androidx.swiperefreshlayout:swiperefreshlayout:1.1.0"
 
 }
