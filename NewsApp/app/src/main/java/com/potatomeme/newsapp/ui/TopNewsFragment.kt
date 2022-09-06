@@ -48,6 +48,12 @@ class TopNewsFragment : Fragment() {
     }
 
     override fun onResume() {
+        binding.swipe.setOnRefreshListener {
+            Thread(Runnable {
+                mainActivity?.let { sendRequest(it.applicationContext) }
+            }).start()
+            binding.swipe.isRefreshing = false
+        }
         sendThread?.start()
         super.onResume()
     }

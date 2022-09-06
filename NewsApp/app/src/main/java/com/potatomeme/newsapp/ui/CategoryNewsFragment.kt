@@ -46,6 +46,12 @@ class CategoryNewsFragment(val num: Int) : Fragment() {
             container?.let { sendRequest(it.context) }
         })
         sendThread?.start()
+        binding.swipe.setOnRefreshListener {
+            Thread(Runnable {
+                mainActivity?.let { sendRequest(it.applicationContext) }
+            }).start()
+            binding.swipe.isRefreshing = false
+        }
         return binding.root
     }
 
