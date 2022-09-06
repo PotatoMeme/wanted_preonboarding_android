@@ -12,7 +12,7 @@ import com.potatomeme.newsapp.gson.Article
 import com.potatomeme.newsapp.helper.AppHelper
 
 
-class NewsAdapter(private val news: List<Article>) :
+class NewsAdapter(private var news: List<Article>) :
     RecyclerView.Adapter<NewsAdapter.ViewHolder>() {
 
     interface OnItemClickListener {
@@ -23,6 +23,10 @@ class NewsAdapter(private val news: List<Article>) :
 
     fun setOnItemClickListener(listener: OnItemClickListener) {
         this.listener = listener
+    }
+
+    fun setNewsList(news: List<Article>){
+        this.news = news
     }
 
     inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {

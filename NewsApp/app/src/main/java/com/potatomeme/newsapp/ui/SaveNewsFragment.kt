@@ -27,7 +27,7 @@ class SaveNewsFragment : Fragment() {
     private var mBinding: FragmentTopNewsBinding? = null
     private val binding get() = mBinding!!
     var mainActivity: MainActivity? = null
-
+    var adapter : NewsAdapter? = null
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
@@ -48,7 +48,7 @@ class SaveNewsFragment : Fragment() {
         super.onResume()
         Log.d(TAG, "on Resume")
         Thread(Runnable {
-            val adapter = DbHelper.findAllArticle()?.let { NewsAdapter(it) }
+            adapter = DbHelper.findAllArticle()?.let { NewsAdapter(it) }
             adapter?.setOnItemClickListener(object : NewsAdapter.OnItemClickListener {
                 override fun onItemClick(v: View, data: Article, pos: Int) {
                     mainActivity?.showDetailFragment(data)
@@ -57,6 +57,14 @@ class SaveNewsFragment : Fragment() {
             binding.newsList.adapter = adapter
         }).start()
     }
+
+    fun reloadData(){
+        Thread(Runnable {
+            DbHelper.findAllArticle()?.let { adapter?.setNewsList(it) }
+            binding.newsList.adapter = adapter
+        }).start()
+    }
+
 
     override fun onPause() {
         super.onPause()

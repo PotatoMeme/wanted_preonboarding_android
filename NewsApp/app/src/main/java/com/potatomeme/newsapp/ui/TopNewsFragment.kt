@@ -44,14 +44,17 @@ class TopNewsFragment : Fragment() {
         sendThread = Thread(Runnable {
             container?.let { sendRequest(it.context) }
         })
-        sendThread?.start()
-
         return binding.root
+    }
+
+    override fun onResume() {
+        sendThread?.start()
+        super.onResume()
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        mBinding = null
+        //mBinding = null
         mainActivity = null
     }
 

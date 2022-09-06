@@ -175,10 +175,16 @@ class MainActivity : AppCompatActivity() {
             android.R.id.home -> {
                 Log.d(TAG, "R.id.home click")
                 when (fragState.pop()) {
-                    Frag.TopNewsDetail, Frag.SavedNewsDetail -> {
+                    Frag.TopNewsDetail-> {
                         supportFragmentManager.beginTransaction().remove(newsDetailFragment)
                             .commit();
                         supportActionBar?.setDisplayHomeAsUpEnabled(false)
+                    }
+                    Frag.SavedNewsDetail -> {
+                        supportFragmentManager.beginTransaction().remove(newsDetailFragment)
+                            .commit();
+                        supportActionBar?.setDisplayHomeAsUpEnabled(false)
+                        saveNewsFragment.reloadData()
                     }
                     Frag.CategoryNewsDetail -> {
                         supportFragmentManager.beginTransaction().remove(newsDetailFragment)
@@ -201,8 +207,12 @@ class MainActivity : AppCompatActivity() {
 
     override fun onBackPressed() {
         when (fragState.pop()) {
-            Frag.TopNewsDetail, Frag.SavedNewsDetail, Frag.CategoryList -> {
+            Frag.TopNewsDetail, Frag.CategoryList -> {
                 supportActionBar?.setDisplayHomeAsUpEnabled(false)
+            }
+            Frag.SavedNewsDetail -> {
+                supportActionBar?.setDisplayHomeAsUpEnabled(false)
+                saveNewsFragment.reloadData()
             }
             else -> {}
         }
