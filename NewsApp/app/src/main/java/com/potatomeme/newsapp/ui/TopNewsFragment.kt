@@ -37,6 +37,9 @@ class TopNewsFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         mBinding = FragmentNewsListBinding.inflate(inflater, container, false)
+        Thread {
+            container?.let { sendRequest() }
+        }.start()
         return binding.root
     }
 
